@@ -105,22 +105,33 @@ if uploaded_file is not None and "openai_key" in st.session_state:
         # Main query input widget
         user_query = st.text_area("Ask a query about the data:")
         
+        # Add info message about terminal output
+        st.info("💡 Check your terminal for a clearer output of the agent's response")
+        
         if st.button("Submit Query"):
             if user_query.strip() == "":
                 st.warning("Please enter a query.")
             else:
                 try:
-                    # Get the response from DuckDbAgent
-                    response1 = duckdb_agent.run(user_query)
+                    # Show loading spinner while processing
+                    with st.spinner('Processing your query...'):
+                        # Get the response from DuckDbAgent
+               
+                        response1 = duckdb_agent.run(user_query)
 
-                    # Extract the content from the RunResponse object
-                    if hasattr(response1, 'content'):
-                        response_content = response1.content
-                    else:
-                        response_content = str(response1)
+                        # Extract the content from the RunResponse object
+                        if hasattr(response1, 'content'):
+                            response_content = response1.content
+                        else:
+                            response_content = str(response1)
+                        response = duckdb_agent.print_response(
+                        user_query,
+                        stream=True,
+                        )
 
                     # Display the response in Streamlit
                     st.markdown(response_content)
+                
                     
                 except Exception as e:
                     st.error(f"Error generating response from the DuckDbAgent: {e}")
